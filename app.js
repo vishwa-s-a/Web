@@ -49,13 +49,27 @@ app.get('/user/dashboard',(req,res)=>{
   // before rendering this page we do the authentication 
   //   process using session and passport package
     if(req.isAuthenticated()){
+        console.log(req.session.passport.user)
         res.send("<H3>You are authenticated successfully now you are in dashboard page</H3>");
     }
     else{
         console.log('User not authenticated!!!')
         res.redirect("/register/user");
     }
-})
+});
+// Logout route handler
+app.get('/logout', (req, res) => {
+  // Destroy the session
+  req.session.destroy((err) => {
+      if (err) {
+          console.error('Error destroying session:', err);
+          res.status(500).send('Error logging out');
+      } else {
+          // Redirect the user to the login page or any other appropriate page
+          res.redirect('/');
+      }
+  });
+});
 
 
 app.listen(port, () => {

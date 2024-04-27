@@ -18,6 +18,26 @@ store.on('error', function(error) {
   console.error('MongoDB session store error:', error);
 });
 
+// Function to remove expired sessions
+function removeExpiredSessions() {
+  // Get the current time in UTC
+  const currentTimeUTC = moment.utc().toDate();
+  
+  // Query for sessions with expiration time less than the current time
+  const query = { expires: { $lt: currentTimeUTC } };
+
+  // Delete the expired sessions
+  store.collection.deleteMany(query, (err, result) => {
+      if (err) {
+          console.error('Error removing expired sessions:', err);
+      } else {
+          console.log('Expired sessions removed:', result.deletedCount);
+      }
+  });
+}
+
+// Set up a periodic task to remove expired sessions (e.g., every hour)
+setInterval(removeExpiredSessions, 3600000); // Run every hour (3600000 milliseconds)
 
 const sessionMiddleware=session({
     secret: 'YourSecretKey_should be big',
