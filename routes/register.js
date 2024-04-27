@@ -9,16 +9,6 @@ const Doctor=require('../models/Doctor');
 //const sessionMiddleware=require('../config/sessionConfig');
 
 router.use(bodyParser.urlencoded({extended:true}))
-// Use express-session middleware with MongoDB session store
-// router.use(sessionMiddleware);
-
-// router.use(passport.initialize());
-// router.use(passport.session());
-
-// passport.use(User.createStrategy());
-
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
 
 // Route for user registration
 router.get('/user',(req,res)=>{
@@ -98,10 +88,8 @@ router.post('/doctor',async(req,res)=>{
         console.log(err);
         res.redirect('/register/doctor')
       }
-      console.log('Authenticating',newDoctor)
-      passport.authenticate("local")(req,res,function(){
-        console.log('Successfull authentication')
-        res.redirect('/user/dashboard')
+      passport.authenticate("doctor")(req,res,function(){
+        res.redirect('/doctor/dashboard')
       });
     });
 
