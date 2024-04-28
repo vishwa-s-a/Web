@@ -85,7 +85,7 @@ app.get('/user/dashboard',(req,res)=>{
     if(req.isAuthenticated()){
         // console.log(req.session.passport.user)
         console.log(req.user)
-        res.send("<H3>You are authenticated successfully now you are in dashboard page</H3>");
+        res.send("<H3>You are authenticated successfully now you are in dashboard page</H3><H3>Your user details are</H3>"+req.user);
     }
     else{
         console.log('User not authenticated!!!')
@@ -97,8 +97,8 @@ app.get('/doctor/dashboard',(req,res)=>{
   //   process using session and passport package
     console.log(req.user)
     if(req.isAuthenticated()){
-        console.log(req.session.passport)
-        res.send("<H3>You are authenticated successfully now you are in dashboard page</H3>");
+        // console.log(req.session.passport)
+        res.send("<H3>You are authenticated successfully now you are in dashboard page</H3><H3>Your doctor details are</H3>"+req.user);
     }
     else{
         console.log('doctor not authenticated!!!')
