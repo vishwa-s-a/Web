@@ -12,9 +12,7 @@ router.use(bodyParser.urlencoded({extended:true}))
 router.use(express.json())
 
 // Route for user registration
-router.get('/user',(req,res)=>{
-  res.send("<H3>you are in register router for registration of user</H3><button><a href='http://localhost:3000/login/user'>user login</a></button><br><button><a href='http://localhost:3000/login/doctor'>Doctor login</a></button>")
-})
+
 router.post('/user', async (req, res) => {
   try {
     let username=req.body.email;
@@ -43,23 +41,26 @@ router.post('/user', async (req, res) => {
 
     // Save the user to the database
     User.register(newUser, req.body.password, function(err, user) {
-      if (err) {
+      if(err){
         console.log(err);
-        res.redirect('/register/user')
+        return res.status(500).json({ message: 'Error registering user' });
       }
     
-      // // Authentication after successful registration
-      // passport.authenticate("user")(req, res, function() {
-      //   res.redirect("/user/dashboard");
-      // });
-      // return res.status(200).json({ message: 'Registration successful' });
-
-      passport.authenticate('user', {
-        successRedirect: '/user/dashboard',
-        failureRedirect: '/register/user',
-        failureFlash: false // Enable if you're using flash messages
+      req.login(user, (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error logging in after registration' });
+        }
+        // Send user data to the frontend
+        let userData={
+          username: user.username,
+          name: user.name,
+          phoneNumber: user.phoneNumber,
+          location:user.location,
+          age:user.age,
+          guardianPresence:user.guardianPresence
+        }
+        return res.status(200).json({ message: 'Registration successful', userData });
       });
-      return res.status(200).json({ message: 'Registration successful' });
     });
 
     // Optionally, you can generate a JWT token here and send it back in the response for immediate login
@@ -68,12 +69,9 @@ router.post('/user', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-router.get('/doctor',(req,res)=>{
-  res.send('<H3>you are in register router for registration of doctor</H3>')
-});
 router.post('/doctor',async(req,res)=>{
   try{
-    console.log(req.body)
+    //console.log(req.body)
     let username=req.body.email;
     let name=req.body.name;
     let specialization=req.body.specialization;
@@ -105,24 +103,29 @@ router.post('/doctor',async(req,res)=>{
 
     });
 
+
     Doctor.register(newDoctor,req.body.password,function(err,doctor){
       if(err){
         console.log(err);
         return res.status(500).json({ message: 'Error registering doctor' });
       }
-      console.log('doctor is waiting')
-      // passport.authenticate('doctor', {
-      //   successRedirect: '/doctor/dashboard',
-      //   failureRedirect: '/register/doctor',
-      //   failureFlash: false // Enable if you're using flash messages
-      // })
-      // Authenticate the doctor after successful registration
-        passport.authenticate('doctor', {
-            successRedirect: '/doctor/dashboard',
-            failureRedirect: '/register/doctor',
-            failureFlash: false // Enable if you're using flash messages
-        });
-        return res.status(200).json({ message: 'Registration successful' });
+      req.login(doctor, (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error logging in after registration' });
+        }
+        //Send doctor data to the frontend
+        let doctorData={
+          username:doctor.username,
+          name:doctor.name,
+          phoneNumber:doctor.phoneNumber,
+          location:doctor.location,
+          specialization:doctor.specialization,
+          yearsOfService:doctor.yearsOfService,
+          availability:doctor.availability
+        }
+        
+        return res.status(200).json({ message: 'Registration successful', doctorData});
+      });
     });
 
   }catch(error){
