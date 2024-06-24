@@ -11,11 +11,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
+  name: {
     type: String,
     required: true,
   },
@@ -23,21 +19,21 @@ const userSchema = new mongoose.Schema({
     type:String,
     required: true,
   },
-  countryCode:{
-    type:String,
-    required:true,
-  },
   location:{
     type:String,
     required:true,
   },
-  medicalConditions: {
-    type: [String], // Assuming medicalConditions is an array of strings
-    default: [] // Default to an empty array if not provided
+  age:{
+    type:Number,
+    required:true,
   },
+  // medicalConditions: {
+  //   type: [String], // Assuming medicalConditions is an array of strings
+  //   default: [] // Default to an empty array if not provided
+  // },
   guardianPresence: {
-    type: Boolean,
-    default: false // Default to false if not provided
+    type: String,
+    required:true,
   }
 });
 

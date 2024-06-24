@@ -32,6 +32,9 @@ mongoose.connect('mongodb://localhost:27017/test')
 // Configure Passport strategy for User
 passport.use('user', new LocalStrategy(User.authenticate()));
 
+// Configure Passport strategy for Doctor
+passport.use('doctor', new LocalStrategy(Doctor.authenticate()));
+
 // Serialize and deserialize User
 passport.serializeUser(function(user, done) {
   if(user.specialization){
@@ -64,20 +67,22 @@ passport.deserializeUser(async function(userData, done) {
   }
 
 });
-// Configure Passport strategy for Doctor
-passport.use('doctor', new LocalStrategy(Doctor.authenticate()));
+
 
 
 //static file
-app.use('/static', express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'dist')))
 
 //routes setup
 app.use('/register', register)
 app.use('/login',login)
 
 
-app.get('/', (req, res) => {
-  res.send("<H2>Welcome to home page of smartHeart</H2><button><a href='http://localhost:3000/register/user'>user register</a></button><br><button><a href='http://localhost:3000/register/doctor'>Doctor register</a></button>")
+// app.get('/', (req, res) => {
+//   res.send("<H2>Welcome to home page of smartHeart</H2><button><a href='http://localhost:3000/register/user'>user register</a></button><br><button><a href='http://localhost:3000/register/doctor'>Doctor register</a></button>")
+// });
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 app.get('/user/dashboard',(req,res)=>{
   // before rendering this page we do the authentication 
@@ -89,7 +94,7 @@ app.get('/user/dashboard',(req,res)=>{
     }
     else{
         console.log('User not authenticated!!!')
-        res.redirect("/register/user");
+        res.redirect("/");
     }
 });
 app.get('/doctor/dashboard',(req,res)=>{
@@ -102,7 +107,7 @@ app.get('/doctor/dashboard',(req,res)=>{
     }
     else{
         console.log('doctor not authenticated!!!')
-        res.redirect("/register/doctor");
+        res.redirect("/");
     }
 });
 // Logout route handler

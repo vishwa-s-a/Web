@@ -9,6 +9,7 @@ const Doctor=require('../models/Doctor');
 //const sessionMiddleware=require('../config/sessionConfig');
 
 router.use(bodyParser.urlencoded({extended:true}))
+router.use(express.json())
 
 // Route for user registration
 router.get('/user',(req,res)=>{
@@ -16,7 +17,12 @@ router.get('/user',(req,res)=>{
 })
 router.post('/user', async (req, res) => {
   try {
-    const { username, firstName, lastName,phoneNumber,countryCode,location, medicalConditions, guardianPresence } = req.body;
+    let username=req.body.email;
+    let name=req.body.name;
+    let phoneNumber=req.body.phoneNumber;
+    let location=req.body.location;
+    let age=req.body.age;
+    let guardianPresence=req.body.guardianPresence;
     // Check if the email is already registered
     const existingUser = await User.findOne({ username });
     if (existingUser) {
@@ -24,16 +30,14 @@ router.post('/user', async (req, res) => {
     }
 
     // Split the string containing medical conditions into an array
-    const medicalConditionsArray = medicalConditions.split(',');
+    //const medicalConditionsArray = medicalConditions.split(',');
     // Create a new user object
     const newUser = new User({
       username: username,
-      firstName: firstName,
-      lastName:lastName,
+      name: name,
       phoneNumber: phoneNumber,
-      countryCode: countryCode,
       location:location,
-      medicalConditions: medicalConditionsArray,
+      age:parseInt(age),
       guardianPresence:guardianPresence
     });
 
@@ -44,10 +48,18 @@ router.post('/user', async (req, res) => {
         res.redirect('/register/user')
       }
     
-      // Authentication after successful registration
-      passport.authenticate("local")(req, res, function() {
-        res.redirect("/user/dashboard");
+      // // Authentication after successful registration
+      // passport.authenticate("user")(req, res, function() {
+      //   res.redirect("/user/dashboard");
+      // });
+      // return res.status(200).json({ message: 'Registration successful' });
+
+      passport.authenticate('user', {
+        successRedirect: '/user/dashboard',
+        failureRedirect: '/register/user',
+        failureFlash: false // Enable if you're using flash messages
       });
+      return res.status(200).json({ message: 'Registration successful' });
     });
 
     // Optionally, you can generate a JWT token here and send it back in the response for immediate login
@@ -61,8 +73,15 @@ router.get('/doctor',(req,res)=>{
 });
 router.post('/doctor',async(req,res)=>{
   try{
-
-    const {username,name,specialization,yearsOfService,availability}=req.body;
+    console.log(req.body)
+    let username=req.body.email;
+    let name=req.body.name;
+    let specialization=req.body.specialization;
+    let yearsOfService=req.body.yearsOfService;
+    let availability=req.body.availability;
+    let phoneNumber=req.body.phoneNumber;
+    let location=req.body.location;
+    // const {username,name,specialization,yearsOfService,availability}=req.body;
 
     //check if the email is already registered
     const existingDoctor=await Doctor.findOne({username});
@@ -78,19 +97,32 @@ router.post('/doctor',async(req,res)=>{
     const newDoctor= new Doctor({
       username:username,
       name:name,
+      phoneNumber:phoneNumber,
+      location:location,
       specialization:specialization,
       yearsOfService:parseInt(yearsOfService),
-      availability:availabilityArray
+      availability:availabilityArray,
+
     });
 
     Doctor.register(newDoctor,req.body.password,function(err,doctor){
       if(err){
         console.log(err);
-        res.redirect('/register/doctor')
+        return res.status(500).json({ message: 'Error registering doctor' });
       }
-      passport.authenticate("doctor")(req,res,function(){
-        res.redirect('/doctor/dashboard')
-      });
+      console.log('doctor is waiting')
+      // passport.authenticate('doctor', {
+      //   successRedirect: '/doctor/dashboard',
+      //   failureRedirect: '/register/doctor',
+      //   failureFlash: false // Enable if you're using flash messages
+      // })
+      // Authenticate the doctor after successful registration
+        passport.authenticate('doctor', {
+            successRedirect: '/doctor/dashboard',
+            failureRedirect: '/register/doctor',
+            failureFlash: false // Enable if you're using flash messages
+        });
+        return res.status(200).json({ message: 'Registration successful' });
     });
 
   }catch(error){
