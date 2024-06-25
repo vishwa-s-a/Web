@@ -9,7 +9,7 @@ const login = require('./routes/login')
 const sessionMiddleware=require('./config/sessionConfig');
 const User = require('./models/User');
 const Doctor=require('./models/Doctor');
-
+const cookieParser = require('cookie-parser');
 
 
 const app = express()
@@ -72,6 +72,7 @@ passport.deserializeUser(async function(userData, done) {
 
 //static file
 app.use(express.static(path.join(__dirname, 'dist')))
+app.use(cookieParser())
 
 //routes setup
 app.use('/register', register)
@@ -81,9 +82,21 @@ app.use('/login',login)
 // app.get('/', (req, res) => {
 //   res.send("<H2>Welcome to home page of smartHeart</H2><button><a href='http://localhost:3000/register/user'>user register</a></button><br><button><a href='http://localhost:3000/register/doctor'>Doctor register</a></button>")
 // });
-app.get('/api/doctor/:username', async (req, res) => {
+app.get('/api/doctor', async (req, res) => {
   try {
-    const { username } = req.params;
+    //console.log('cookies received: ',req.cookies);
+    if(req.isAuthenticated()){
+      console.log('Authenticated user is: ',req.user);
+      const username=req.user.name;
+      appointments={
+        today:`no appointments for doctor ${username}`,
+        tomorrow:`no appointments for doctor ${username}`
+      }
+      res.status(200).json(appointments);
+    }
+
+    //const username=req.user.username;
+    //const { username } = req.params;
     //console.log('from /api/doctor',username)
     // const doctor = await Doctor.findOne({ username: username });
 
@@ -91,19 +104,23 @@ app.get('/api/doctor/:username', async (req, res) => {
     //   return res.status(404).json({ message: 'Doctor not found' });
     // }
 
-    appointments={
-      today:'no appointments for doctor',
-      tomorrow:'no appointments for doctor'
-    }
-    res.status(200).json(appointments);
   } catch (error) {
     console.error('Error fetching doctor data:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-app.get('/api/patient/:username', async (req, res) => {
+app.get('/api/patient', async (req, res) => {
   try {
-    const { username } = req.params;
+    if(req.isAuthenticated()){
+      console.log('Authenticated user is: ',req.user);
+      const username=req.user.name;
+      appointments={
+        today:`no appointments for patient ${username}`,
+        tomorrow:`no appointments for patient ${username}`
+      }
+      res.status(200).json(appointments);
+    }
+    //const { username } = req.params;
     //console.log('from /api/patient',username)
     // const doctor = await Doctor.findOne({ username: username });
 
@@ -111,11 +128,6 @@ app.get('/api/patient/:username', async (req, res) => {
     //   return res.status(404).json({ message: 'Doctor not found' });
     // }
 
-    appointments={
-      today:'no appointments for patient',
-      tomorrow:'no appointments for patient'
-    }
-    res.status(200).json(appointments);
   } catch (error) {
     console.error('Error fetching doctor data:', error);
     res.status(500).json({ message: 'Internal server error' });
